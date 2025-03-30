@@ -431,3 +431,14 @@ def predict(input_data: PredictionInput):
         "proba_inondation_en_pourcentage": result["proba inondation en pourcentage"].iloc[0],
         "annonce": result["annonce"].iloc[0]
     }
+
+app = FastAPI()
+
+# Définition de tes endpoints ici...
+
+import os
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.getenv("PORT", 8000))  # Utilise le port de Render ou 8000 en local
+    uvicorn.run(app, host="0.0.0.0", port=port)
