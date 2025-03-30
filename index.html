@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ML API Prediction</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #0d0d0d;
+        color: white;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      header {
+        background-color: black;
+        padding: 15px;
+      }
+      nav ul {
+        list-style: none;
+        display: flex;
+        justify-content: center;
+        padding: 0;
+      }
+      nav ul li {
+        margin: 0 15px;
+      }
+      nav ul li a {
+        color: white;
+        text-decoration: none;
+        font-size: 18px;
+      }
+      .container {
+        margin-top: 30px;
+      }
+      .card {
+        background-color: #222;
+        color: white;
+      }
+      .btn-primary {
+        background-color: #7b2cbf;
+        border: none;
+      }
+      .btn-primary:hover {
+        background-color: #5a1a99;
+      }
+      .header-image {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <ul>
+          <li><a href="#">Accueil</a></li>
+          <li><a href="#">Prédictions</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+    <div class="container-fluid p-0">
+      <img
+        src="https://www.zabala.fr/wp-content/uploads/2023/11/intelligence-artificielle-et-conseil-1200x675.jpg"
+        alt="AI Prediction"
+        class="header-image"
+      />
+    </div>
+    <section class="hero text-center p-4">
+      <div class="container">
+        <h1>Machine Learning API Prediction</h1>
+        <p>
+          Utilisez notre API pour prédire le risque d'inondation grâce aux prévisions météo et au débit des cours d'eaux de votre localité.
+        </p>
+      </div>
+    </section>
+    <div class="container">
+      <div class="card shadow p-4">
+        <h2 class="text-center mb-4">Faites une Prédiction</h2>
+        <form id="predictionForm">
+          <div id="inputFields" class="row g-3"></div>
+          <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary">Envoyer</button>
+          </div>
+        </form>
+        <h3 class="mt-4">Résultat :</h3>
+        <pre id="result" class="p-3 bg-dark text-light border rounded"></pre>
+      </div>
+    </div>
+    <script>
+      // Définition de tous les champs attendus par l'API
+      const fields = {
+        "academie_nom_Amiens": 0,
+        "academie_nom_Besançon": 1,
+        "academie_nom_Bordeaux": 0,
+        "academie_nom_Clermont-Ferrand": 0,
+        "academie_nom_Créteil": 0,
+        "academie_nom_Dijon": 0,
+        "academie_nom_Grenoble": 0,
+        "academie_nom_Lille": 0,
+        "academie_nom_Lyon": 0,
+        "academie_nom_Montpellier": 0,
+        "academie_nom_Nancy-Metz": 0,
+        "academie_nom_Nantes": 0,
+        "academie_nom_Normandie": 0,
+        "academie_nom_Orléans-Tours": 0,
+        "academie_nom_Poitiers": 0,
+        "academie_nom_Rennes": 0,
+        "academie_nom_Strasbourg": 0,
+        "academie_nom_Toulouse": 0,
+        "statut_commune_unite_urbaine_B": 0,
+        "statut_commune_unite_urbaine_C": 1,
+        "statut_commune_unite_urbaine_H": 0,
+        "statut_commune_unite_urbaine_I": 0,
+        "inondable_0": 0,
+        "inondable_1": 1,
+        "montagne1_0": 1,
+        "montagne1_1": 0,
+        "zone_defavorisee_simple1_0": 0,
+        "zone_defavorisee_simple1_1": 1,
+        "mois_lettre_April": 0,
+        "mois_lettre_August": 0,
+        "mois_lettre_December": 0,
+        "mois_lettre_February": 0,
+        "mois_lettre_January": 0,
+        "mois_lettre_July": 0,
+        "mois_lettre_June": 0,
+        "mois_lettre_March": 0,
+        "mois_lettre_May": 0,
+        "mois_lettre_November": 0,
+        "mois_lettre_October": 0,
+        "mois_lettre_September": 1,
+        "resultat_obs_elab": 600000,
+        "vent_moyen": 70,
+        "humidite": 80,
+        "pluie_24h": 89,
+        "vent_direction": 150,
+        "nb_rafales_10min": 150,
+        "nb_c_insee_meteo": 5
+      };
+
+      // Création dynamique des inputs dans le formulaire
+      const inputFieldsDiv = document.getElementById("inputFields");
+      for (const key in fields) {
+        const div = document.createElement("div");
+        div.className = "col-md-4";
+
+        const label = document.createElement("label");
+        label.textContent = key;
+        label.className = "form-label";
+        label.htmlFor = key;
+
+        const input = document.createElement("input");
+        input.type = "number";
+        input.className = "form-control";
+        input.id = key;
+        input.name = key;
+        input.value = fields[key];
+        input.step = "any";
+
+        div.appendChild(label);
+        div.appendChild(input);
+        inputFieldsDiv.appendChild(div);
+      }
+
+      // Gestion de la soumission du formulaire
+      document.getElementById("predictionForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        let formData = {};
+        for (const key in fields) {
+          formData[key] = parseFloat(document.getElementById(key).value);
+        }
+
+        // Envoi de la requête POST à l'API
+        fetch("https://inonadationprediction.onrender.com/predict", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ data: formData }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Erreur réseau : " + response.status);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+          })
+          .catch((error) => {
+            document.getElementById("result").textContent = "Erreur : " + error;
+          });
+      });
+    </script>
+  </body>
+</html>
