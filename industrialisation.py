@@ -11,6 +11,7 @@ import logging
 from datetime import datetime, timezone, timedelta
 import joblib
 
+
 # Charger le modèle, le préprocesseur et la liste des features attendues
 model = joblib.load("model.joblib")
 preprocessor = joblib.load("preprocessor.joblib")
@@ -26,7 +27,7 @@ app = FastAPI()
 # Configuration de CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[ "http://localhost:8080"], #"https://web-prediction-inondation-37.onrender.com"
+    allow_origins=[ "*"], #"https://web-prediction-inondation-37.onrender.com",http://localhost:8080
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
