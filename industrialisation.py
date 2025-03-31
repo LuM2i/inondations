@@ -438,8 +438,8 @@ def predict(input_data: PredictionInput):
 # Définition de tes endpoints ici...
 
 import os
-
+import uvicorn
 if __name__ == "__main__":
-    import uvicorn
+    
     port = int(os.getenv("PORT", 8000))  # Utilise le port de Render ou 8000 en local
     uvicorn.run(app, host="0.0.0.0", port=port)

@@ -17,4 +17,7 @@ EXPOSE 8000
 ENV PORT=8000
  
 # Commande pour démarrer l'API FastAPI avec Uvicorn
-CMD ["sh", "-c", "uvicorn industrialisation:app --host 0.0.0.0 --port ${PORT}"]
+#CMD ["sh", "-c", "uvicorn industrialisation:app --host 0.0.0.0 --port ${PORT}"]
+
+# Commande pour démarrer l'API FastAPI avec uvicorn via le script Python
+CMD ["python", "industrialisation.py"]
