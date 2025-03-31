@@ -12,6 +12,9 @@ RUN pip install --no-cache-dir -r requirements.txt
  
 # Exposition du port de l'API
 EXPOSE 8000
+
+# Définir la variable d'environnement PORT (Render l'utilisera)
+ENV PORT=8000
  
 # Commande pour démarrer l'API FastAPI avec Uvicorn
-CMD ["sh", "-c", "uvicorn industrialisation:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "uvicorn industrialisation:app --host 0.0.0.0 --port ${PORT}"]
