@@ -27,7 +27,7 @@ app = FastAPI()
 # Configuration de CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[ "*"], #"https://web-prediction-inondation-37.onrender.com",http://localhost:8080
+    allow_origins=[ "http://localhost:8080"], #"https://web-prediction-inondation-37.onrender.com",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -273,7 +273,7 @@ def merge_data():
     final_df = enrich_with_static_data(merged_df)
     final_df = final_df.drop_duplicates()
     # Sauvegarder les inputs enrichis pour vérification
-    final_df.to_csv('file1.csv', index=False)
+    #final_df.to_csv('file1.csv', index=False)
     return final_df
 
 # --- Fonction de pré-calcul des prédictions quotidiennes ---
