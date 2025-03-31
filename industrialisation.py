@@ -207,7 +207,7 @@ def enrich_with_static_data(resultat: pd.DataFrame) -> pd.DataFrame:
     df = df.reset_index(drop=True)
     
     # Réinjecter la colonne "departement" sauvegardée
-    df['departement'] = dept_temp
+    df['departement'] = df['dep_commune'] #dept_temp
 
     # IMPORTANT : Ne PAS supprimer "code_insee" car il sera utilisé pour les merges suivants.
     # Deuxième join : fusionner avec zones_inondables_df
@@ -236,7 +236,7 @@ def enrich_with_static_data(resultat: pd.DataFrame) -> pd.DataFrame:
                              'max_portee','max_portee_date']
     df = df.drop(columns=colonnes_a_supprimer, errors='ignore')
     print(df.info())
-    
+    df.to_csv('file1.csv', index=False)
     # Transformation des colonnes booléennes en int
     bool_cols = df.select_dtypes(include=['bool']).columns
     df[bool_cols] = df[bool_cols].astype(int)
