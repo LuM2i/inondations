@@ -53,6 +53,16 @@
         height: 300px;
         object-fit: cover;
       }
+      .select-container {
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      select {
+        width: 100%;
+      }
+      #result {
+        min-height: 150px;
+      }
     </style>
   </head>
   <body>
@@ -76,7 +86,8 @@
       <div class="container">
         <h1>Machine Learning API Prediction</h1>
         <p>
-          Utilisez notre API pour prédire le risque d'inondation grâce aux prévisions météo et au débit des cours d'eaux de votre localité.
+          Utilisez notre API de Machine Learning pour effectuer des prédictions
+          basées sur des données météorologiques et de pollution.
         </p>
       </div>
     </section>
@@ -84,121 +95,70 @@
       <div class="card shadow p-4">
         <h2 class="text-center mb-4">Faites une Prédiction</h2>
         <form id="predictionForm">
-          <div id="inputFields" class="row g-3"></div>
-          <div class="text-center mt-4">
-            <button type="submit" class="btn btn-primary">Envoyer</button>
-          </div>
-        </form>
-        <h3 class="mt-4">Résultat :</h3>
-        <pre id="result" class="p-3 bg-dark text-light border rounded"></pre>
-      </div>
-    </div>
-    <script>
-      // Définition de tous les champs attendus par l'API
-      const fields = {
-        "academie_nom_Amiens": 0,
-        "academie_nom_Besançon": 1,
-        "academie_nom_Bordeaux": 0,
-        "academie_nom_Clermont-Ferrand": 0,
-        "academie_nom_Créteil": 0,
-        "academie_nom_Dijon": 0,
-        "academie_nom_Grenoble": 0,
-        "academie_nom_Lille": 0,
-        "academie_nom_Lyon": 0,
-        "academie_nom_Montpellier": 0,
-        "academie_nom_Nancy-Metz": 0,
-        "academie_nom_Nantes": 0,
-        "academie_nom_Normandie": 0,
-        "academie_nom_Orléans-Tours": 0,
-        "academie_nom_Poitiers": 0,
-        "academie_nom_Rennes": 0,
-        "academie_nom_Strasbourg": 0,
-        "academie_nom_Toulouse": 0,
-        "statut_commune_unite_urbaine_B": 0,
-        "statut_commune_unite_urbaine_C": 1,
-        "statut_commune_unite_urbaine_H": 0,
-        "statut_commune_unite_urbaine_I": 0,
-        "inondable_0": 0,
-        "inondable_1": 1,
-        "montagne1_0": 1,
-        "montagne1_1": 0,
-        "zone_defavorisee_simple1_0": 0,
-        "zone_defavorisee_simple1_1": 1,
-        "mois_lettre_April": 0,
-        "mois_lettre_August": 0,
-        "mois_lettre_December": 0,
-        "mois_lettre_February": 0,
-        "mois_lettre_January": 0,
-        "mois_lettre_July": 0,
-        "mois_lettre_June": 0,
-        "mois_lettre_March": 0,
-        "mois_lettre_May": 0,
-        "mois_lettre_November": 0,
-        "mois_lettre_October": 0,
-        "mois_lettre_September": 1,
-        "resultat_obs_elab": 600000,
-        "vent_moyen": 70,
-        "humidite": 80,
-        "pluie_24h": 89,
-        "vent_direction": 150,
-        "nb_rafales_10min": 150,
-        "nb_c_insee_meteo": 5
-      };
-
-      // Création dynamique des inputs dans le formulaire
-      const inputFieldsDiv = document.getElementById("inputFields");
-      for (const key in fields) {
-        const div = document.createElement("div");
-        div.className = "col-md-4";
-
-        const label = document.createElement("label");
-        label.textContent = key;
-        label.className = "form-label";
-        label.htmlFor = key;
-
-        const input = document.createElement("input");
-        input.type = "number";
-        input.className = "form-control";
-        input.id = key;
-        input.name = key;
-        input.value = fields[key];
-        input.step = "any";
-
-        div.appendChild(label);
-        div.appendChild(input);
-        inputFieldsDiv.appendChild(div);
-      }
-
-      // Gestion de la soumission du formulaire
-      document.getElementById("predictionForm").addEventListener("submit", function (event) {
-        event.preventDefault();
-
-        let formData = {};
-        for (const key in fields) {
-          formData[key] = parseFloat(document.getElementById(key).value);
-        }
-
-        // Envoi de la requête POST à l'API
-        fetch("https://inonadationprediction.onrender.com/predict", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ data: formData }),
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Erreur réseau : " + response.status);
-            }
-            return response.json();
-          })
-          .then((data) => {
-            document.getElementById("result").textContent = JSON.stringify(data, null, 2);
-          })
-          .catch((error) => {
-            document.getElementById("result").textContent = "Erreur : " + error;
-          });
-      });
-    </script>
-  </body>
-</html>
+          <div class="mb-3">
+            <label for="departement" class="form-label"
+              >Sélectionnez votre numéro de département :</label
+            >
+            <div class="select-container">
+              <select
+                id="departement"
+                name="departement"
+                class="form-select"
+                size="5"
+                required
+              >
+                <option value="" disabled selected>
+                  -- Choisissez un département --
+                </option>
+                <!-- Options des départements de 1 à 95 -->
+                <option value="1">01 - Ain</option>
+                <option value="2">02 - Aisne</option>
+                <option value="3">03 - Allier</option>
+                <option value="4">04 - Alpes-de-Haute-Provence</option>
+                <option value="5">05 - Hautes-Alpes</option>
+                <option value="6">06 - Alpes-Maritimes</option>
+                <option value="7">07 - Ardèche</option>
+                <option value="8">08 - Ardennes</option>
+                <option value="9">09 - Ariège</option>
+                <option value="10">10 - Aube</option>
+                <option value="11">11 - Aude</option>
+                <option value="12">12 - Aveyron</option>
+                <option value="13">13 - Bouches-du-Rhône</option>
+                <option value="14">14 - Calvados</option>
+                <option value="15">15 - Cantal</option>
+                <option value="16">16 - Charente</option>
+                <option value="17">17 - Charente-Maritime</option>
+                <option value="18">18 - Cher</option>
+                <option value="19">19 - Corrèze</option>
+                <option value="20">20 - Corse</option>
+                <option value="21">21 - Côte-d'Or</option>
+                <option value="22">22 - Côtes-d'Armor</option>
+                <option value="23">23 - Creuse</option>
+                <option value="24">24 - Dordogne</option>
+                <option value="25">25 - Doubs</option>
+                <option value="26">26 - Drôme</option>
+                <option value="27">27 - Eure</option>
+                <option value="28">28 - Eure-et-Loir</option>
+                <option value="29">29 - Finistère</option>
+                <option value="30">30 - Gard</option>
+                <option value="31">31 - Haute-Garonne</option>
+                <option value="32">32 - Gers</option>
+                <option value="33">33 - Gironde</option>
+                <option value="34">34 - Hérault</option>
+                <option value="35">35 - Ille-et-Vilaine</option>
+                <option value="36">36 - Indre</option>
+                <option value="37">37 - Indre-et-Loire</option>
+                <option value="38">38 - Isère</option>
+                <option value="39">39 - Jura</option>
+                <option value="40">40 - Landes</option>
+                <option value="41">41 - Loir-et-Cher</option>
+                <option value="42">42 - Loire</option>
+                <option value="43">43 - Haute-Loire</option>
+                <option value="44">44 - Loire-Atlantique</option>
+                <option value="45">45 - Loiret</option>
+                <option value="46">46 - Lot</option>
+                <option value="47">47 - Lot-et-Garonne</option>
+                <option value="48">48 - Lozère</option>
+                <option value="49">49 - Maine-et-Loire
+::contentReference[oaicite:0]{index=0}
+ 
