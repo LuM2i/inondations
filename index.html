@@ -18,7 +18,12 @@
         .header-image { width: 100%; height: 300px; object-fit: cover; }
         .select-container { max-height: 200px; overflow-y: auto; }
         select { width: 100%; }
-        #result { min-height: 150px; }
+        #result { min-height: 150px; padding: 20px; margin-top: 20px; background-color: #333; border-radius: 5px; }
+        .risk-low { color: #4caf50; font-weight: bold; }
+        .risk-medium { color: #ff9800; font-weight: bold; }
+        .risk-high { color: #f44336; font-weight: bold; }
+        .loading { text-align: center; padding: 20px; }
+        .error-message { background-color: rgba(255, 0, 0, 0.2); padding: 15px; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -37,12 +42,12 @@
 <section class="hero text-center p-4">
     <div class="container">
         <h1>Machine Learning API Prediction</h1>
-        <p> Anticipez mieux le risque d'inodation dans votre localité grâce à notre IA basée sur les données météos et hydrologiques en temps réel. </p>
+        <p>Anticipez mieux le risque d'inondation dans votre localité grâce à notre IA basée sur les données météos et hydrologiques en temps réel.</p>
     </div>
 </section>
 <div class="container">
     <div class="card shadow p-4">
-        <h2 class="text-center mb-4">Identifiez le risque àcourt terme</h2>
+        <h2 class="text-center mb-4">Identifiez le risque à court terme</h2>
         <form id="predictionForm">
             <div class="mb-3">
                 <label for="departement" class="form-label">Sélectionnez votre numéro de département :</label>
@@ -80,7 +85,92 @@
             </div>
             <button type="submit" class="btn btn-primary w-100">Obtenir les prévisions</button>
         </form>
+        <div id="result" class="mt-4" style="display: none;"></div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const form = document.getElementById("predictionForm");
+    const resultDiv = document.getElementById("result");
+    
+    form.addEventListener("submit", function(event) {
+        event.preventDefault();
+        
+        const departement = document.getElementById("departement").value;
+        // S'assurer que le département est envoyé comme une chaîne de caractères
+        // et formater avec un zéro devant si nécessaire (01, 02, etc.)
+        const deptStr = departement.toString().padStart(2, '0');
+        
+        // Afficher le div de résultat et montrer le chargement
+        resultDiv.style.display = "block";
+        resultDiv.innerHTML = '<div class="loading"><div class="spinner-border text-light" role="status"></div><p class="mt-2">Chargement des prédictions...</p></div>';
+        
+        // Créer l'objet de données exactement comme attendu par l'API
+        const requestData = {
+            departement: deptStr
+        };
+        
+        // Appel à l'API
+        fetch("/predict", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Erreur serveur: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Trouver le niveau de risque à partir du message
+            let riskClass = "risk-low";
+            if (data.annonce && data.annonce.includes("Risque élevé")) {
+                riskClass = "risk-high";
+            } else if (data.annonce && data.annonce.includes("Risque moyen")) {
+                riskClass = "risk-medium";
+            }
+            
+            // Formatter la date
+            const dateOptions = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            const formattedDate = new Date().toLocaleDateString('fr-FR', dateOptions);
+            
+            // Afficher le message de prédiction
+            if (data.annonce) {
+                resultDiv.innerHTML = `
+                    <h3 class="mb-3">Prévision pour le département ${departement} - ${departements[departement]}</h3>
+                    <p class="${riskClass}">${data.annonce}</p>
+                    <p class="text-muted mt-3">Dernière mise à jour: ${formattedDate}</p>
+                `;
+            } else {
+                // Au cas où l'API retourne une structure différente
+                resultDiv.innerHTML = `
+                    <h3 class="mb-3">Prévision pour le département ${departement} - ${departements[departement]}</h3>
+                    <p>Les données de prédiction ne sont pas disponibles dans le format attendu.</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            }
+        })
+        .catch(error => {
+            resultDiv.innerHTML = `
+                <div class="error-message">
+                    <h4>Erreur lors de la récupération des données</h4>
+                    <p>${error.message}</p>
+                    <p>Veuillez réessayer ultérieurement ou contacter le support si le problème persiste.</p>
+                </div>
+            `;
+        });
+    });
+});
+</script>
 </body>
 </html>
