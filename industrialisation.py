@@ -126,7 +126,7 @@ def fetch_hydro_data():
     for i, row in hydro_stations.iterrows():
         code_site = row['code_site']
         url = (
-            f"https://hubeau.eaufrance.fr/api/v1/hydrometrie/observations_tr"
+            f"https://hubeau.eaufrance.fr/api/v2/hydrometrie/observations_tr"
             f"?code_entite={code_site}&date_debut_obs={date_debut}"
             f"&date_fin_obs={date_fin}&grandeur_hydro=Q&size=100&sort=desc"
         )
@@ -433,7 +433,7 @@ def predict(input_data: PredictionInput):
         "annonce": result["annonce"].iloc[0]
     }
 
-app = FastAPI()
+
 
 # Définition de tes endpoints ici...
 
