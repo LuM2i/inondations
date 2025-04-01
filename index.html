@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -16,8 +18,6 @@
         .btn-primary { background-color: #7b2cbf; border: none; }
         .btn-primary:hover { background-color: #5a1a99; }
         .header-image { width: 100%; height: 300px; object-fit: cover; }
-        .select-container { max-height: 200px; overflow-y: auto; }
-        select { width: 100%; }
         #result { min-height: 150px; padding: 20px; margin-top: 20px; background-color: #333; border-radius: 5px; }
         .risk-low { color: #4caf50; font-weight: bold; }
         .risk-medium { color: #ff9800; font-weight: bold; }
@@ -50,38 +50,11 @@
         <h2 class="text-center mb-4">Identifiez le risque à court terme</h2>
         <form id="predictionForm">
             <div class="mb-3">
-                <label for="departement" class="form-label">Sélectionnez votre numéro de département :</label>
-                <div class="select-container">
-                    <select id="departement" name="departement" class="form-select" required>
-                        <option value="" disabled selected> -- Choisissez un département -- </option>
-                        <script>
-                            const departements = {
-                                1: "Ain", 2: "Aisne", 3: "Allier", 4: "Alpes-de-Haute-Provence", 5: "Hautes-Alpes",
-                                6: "Alpes-Maritimes", 7: "Ardèche", 8: "Ardennes", 9: "Ariège", 10: "Aube",
-                                11: "Aude", 12: "Aveyron", 13: "Bouches-du-Rhône", 14: "Calvados", 15: "Cantal",
-                                16: "Charente", 17: "Charente-Maritime", 18: "Cher", 19: "Corrèze", 20: "Corse-du-Sud",
-                                21: "Côte-d'Or", 22: "Côtes-d'Armor", 23: "Creuse", 24: "Dordogne", 25: "Doubs",
-                                26: "Drôme", 27: "Eure", 28: "Eure-et-Loir", 29: "Finistère", 30: "Gard",
-                                31: "Haute-Garonne", 32: "Gers", 33: "Gironde", 34: "Hérault", 35: "Ille-et-Vilaine",
-                                36: "Indre", 37: "Indre-et-Loire", 38: "Isère", 39: "Jura", 40: "Landes",
-                                41: "Loir-et-Cher", 42: "Loire", 43: "Haute-Loire", 44: "Loire-Atlantique", 45: "Loiret",
-                                46: "Lot", 47: "Lot-et-Garonne", 48: "Lozère", 49: "Maine-et-Loire", 50: "Manche",
-                                51: "Marne", 52: "Haute-Marne", 53: "Mayenne", 54: "Meurthe-et-Moselle", 55: "Meuse",
-                                56: "Morbihan", 57: "Moselle", 58: "Nièvre", 59: "Nord", 60: "Oise",
-                                61: "Orne", 62: "Pas-de-Calais", 63: "Puy-de-Dôme", 64: "Pyrénées-Atlantiques", 65: "Hautes-Pyrénées",
-                                66: "Pyrénées-Orientales", 67: "Bas-Rhin", 68: "Haut-Rhin", 69: "Rhône", 70: "Haute-Saône",
-                                71: "Saône-et-Loire", 72: "Sarthe", 73: "Savoie", 74: "Haute-Savoie", 75: "Paris",
-                                76: "Seine-Maritime", 77: "Seine-et-Marne", 78: "Yvelines", 79: "Deux-Sèvres", 80: "Somme",
-                                81: "Tarn", 82: "Tarn-et-Garonne", 83: "Var", 84: "Vaucluse", 85: "Vendée",
-                                86: "Vienne", 87: "Haute-Vienne", 88: "Vosges", 89: "Yonne", 90: "Territoire de Belfort",
-                                91: "Essonne", 92: "Hauts-de-Seine", 93: "Seine-Saint-Denis", 94: "Val-de-Marne", 95: "Val-d'Oise"
-                            };
-                            for (let num in departements) {
-                                document.write(`<option value="${num}">${num} - ${departements[num]}</option>`);
-                            }
-                        </script>
-                    </select>
-                </div>
+                <label for="departement" class="form-label">Entrez votre numéro de département (2 chiffres) :</label>
+                <input type="text" id="departement" name="departement" class="form-control" 
+                       required maxlength="2" pattern="[0-9]{1,2}" 
+                       placeholder="Ex: 01, 75, 13">
+                <small class="form-text text-muted">Entrez un numéro entre 01 et 95</small>
             </div>
             <button type="submit" class="btn btn-primary w-100">Obtenir les prévisions</button>
         </form>
@@ -94,19 +67,55 @@ document.addEventListener("DOMContentLoaded", function() {
     const form = document.getElementById("predictionForm");
     const resultDiv = document.getElementById("result");
     
+    // Dictionnaire des départements pour afficher le nom
+    const departements = {
+        1: "Ain", 2: "Aisne", 3: "Allier", 4: "Alpes-de-Haute-Provence", 5: "Hautes-Alpes",
+        6: "Alpes-Maritimes", 7: "Ardèche", 8: "Ardennes", 9: "Ariège", 10: "Aube",
+        11: "Aude", 12: "Aveyron", 13: "Bouches-du-Rhône", 14: "Calvados", 15: "Cantal",
+        16: "Charente", 17: "Charente-Maritime", 18: "Cher", 19: "Corrèze", 20: "Corse-du-Sud",
+        21: "Côte-d'Or", 22: "Côtes-d'Armor", 23: "Creuse", 24: "Dordogne", 25: "Doubs",
+        26: "Drôme", 27: "Eure", 28: "Eure-et-Loir", 29: "Finistère", 30: "Gard",
+        31: "Haute-Garonne", 32: "Gers", 33: "Gironde", 34: "Hérault", 35: "Ille-et-Vilaine",
+        36: "Indre", 37: "Indre-et-Loire", 38: "Isère", 39: "Jura", 40: "Landes",
+        41: "Loir-et-Cher", 42: "Loire", 43: "Haute-Loire", 44: "Loire-Atlantique", 45: "Loiret",
+        46: "Lot", 47: "Lot-et-Garonne", 48: "Lozère", 49: "Maine-et-Loire", 50: "Manche",
+        51: "Marne", 52: "Haute-Marne", 53: "Mayenne", 54: "Meurthe-et-Moselle", 55: "Meuse",
+        56: "Morbihan", 57: "Moselle", 58: "Nièvre", 59: "Nord", 60: "Oise",
+        61: "Orne", 62: "Pas-de-Calais", 63: "Puy-de-Dôme", 64: "Pyrénées-Atlantiques", 65: "Hautes-Pyrénées",
+        66: "Pyrénées-Orientales", 67: "Bas-Rhin", 68: "Haut-Rhin", 69: "Rhône", 70: "Haute-Saône",
+        71: "Saône-et-Loire", 72: "Sarthe", 73: "Savoie", 74: "Haute-Savoie", 75: "Paris",
+        76: "Seine-Maritime", 77: "Seine-et-Marne", 78: "Yvelines", 79: "Deux-Sèvres", 80: "Somme",
+        81: "Tarn", 82: "Tarn-et-Garonne", 83: "Var", 84: "Vaucluse", 85: "Vendée",
+        86: "Vienne", 87: "Haute-Vienne", 88: "Vosges", 89: "Yonne", 90: "Territoire de Belfort",
+        91: "Essonne", 92: "Hauts-de-Seine", 93: "Seine-Saint-Denis", 94: "Val-de-Marne", 95: "Val-d'Oise"
+    };
+    
     form.addEventListener("submit", function(event) {
         event.preventDefault();
         
-        const departement = document.getElementById("departement").value;
-        // S'assurer que le département est envoyé comme une chaîne de caractères
-        // et formater avec un zéro devant si nécessaire (01, 02, etc.)
-        const deptStr = departement.toString().padStart(2, '0');
+        const departementInput = document.getElementById("departement").value.trim();
+        
+        // Convertir l'entrée en nombre et vérifier qu'elle est entre 1 et 95
+        const deptNum = parseInt(departementInput, 10);
+        if (isNaN(deptNum) || deptNum < 1 || deptNum > 95) {
+            resultDiv.style.display = "block";
+            resultDiv.innerHTML = `
+                <div class="error-message">
+                    <h4>Erreur de saisie</h4>
+                    <p>Veuillez entrer un numéro de département valide entre 1 et 95.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Formater avec un zéro devant si nécessaire (01, 02, etc.)
+        const deptStr = deptNum.toString().padStart(2, '0');
         
         // Afficher le div de résultat et montrer le chargement
         resultDiv.style.display = "block";
         resultDiv.innerHTML = '<div class="loading"><div class="spinner-border text-light" role="status"></div><p class="mt-2">Chargement des prédictions...</p></div>';
         
-        // Créer l'objet de données exactement comme attendu par l'API
+        // Créer l'objet de données
         const requestData = {
             departement: deptStr
         };
@@ -117,7 +126,7 @@ document.addEventListener("DOMContentLoaded", function() {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(requestData.departement),
+            body: JSON.stringify(requestData),
         })
         .then(response => {
             if (!response.ok) {
@@ -147,14 +156,14 @@ document.addEventListener("DOMContentLoaded", function() {
             // Afficher le message de prédiction
             if (data.annonce) {
                 resultDiv.innerHTML = `
-                    <h3 class="mb-3">Prévision pour le département ${departement} - ${departements[departement]}</h3>
+                    <h3 class="mb-3">Prévision pour le département ${deptNum} - ${departements[deptNum]}</h3>
                     <p class="${riskClass}">${data.annonce}</p>
                     <p class="text-muted mt-3">Dernière mise à jour: ${formattedDate}</p>
                 `;
             } else {
                 // Au cas où l'API retourne une structure différente
                 resultDiv.innerHTML = `
-                    <h3 class="mb-3">Prévision pour le département ${departement} - ${departements[departement]}</h3>
+                    <h3 class="mb-3">Prévision pour le département ${deptNum} - ${departements[deptNum]}</h3>
                     <p>Les données de prédiction ne sont pas disponibles dans le format attendu.</p>
                     <pre>${JSON.stringify(data, null, 2)}</pre>
                 `;
