@@ -395,7 +395,7 @@ daily_predictions = precompute_predictions()
 # --- Routes de l'API ---
 @app.get("/")
 def home():
-    return {"message": "API de prédiction des risques d'inondation par département"}
+    return {"message": "API de prédiction des risques d'inondation dans votre département"}
 
 # Schéma d'entrée pour la prédiction (seulement le département)
 class PredictionInput(BaseModel):
@@ -411,7 +411,7 @@ def update_daily_data():
     daily_data = merge_data()
     daily_predictions = precompute_predictions()
     n_dep = len(daily_data) if not daily_data.empty else 0
-    return {"message": "Données quotidiennes mises à jour", "n_departements": n_dep}
+    return {"message": "Données quotidiennes mises à jour", "n_communes": n_dep}
 
 @app.post("/predict")
 def predict(input_data: PredictionInput):

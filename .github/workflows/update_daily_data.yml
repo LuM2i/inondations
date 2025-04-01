@@ -1,0 +1,13 @@
+name: Update Daily Data
+
+on:
+  schedule:
+    - cron: '0 1 * * *'  # Tous les jours à 03h00 UTC (ajuste si besoin)
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger update_daily_data endpoint
+        run: |
+          curl -X GET https://inondations.onrender.com/update_daily_data
