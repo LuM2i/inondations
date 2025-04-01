@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -9,42 +7,17 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
         body { background-color: #0d0d0d; color: white; font-family: Arial, sans-serif; margin: 0; padding: 0; }
-        header { background-color: black; padding: 15px; }
-        nav ul { list-style: none; display: flex; justify-content: center; padding: 0; }
-        nav ul li { margin: 0 15px; }
-        nav ul li a { color: white; text-decoration: none; font-size: 18px; }
         .container { margin-top: 30px; }
         .card { background-color: #222; color: white; }
         .btn-primary { background-color: #7b2cbf; border: none; }
         .btn-primary:hover { background-color: #5a1a99; }
-        .header-image { width: 100%; height: 300px; object-fit: cover; }
         #result { min-height: 150px; padding: 20px; margin-top: 20px; background-color: #333; border-radius: 5px; }
-        .risk-low { color: #4caf50; font-weight: bold; }
-        .risk-medium { color: #ff9800; font-weight: bold; }
-        .risk-high { color: #f44336; font-weight: bold; }
         .loading { text-align: center; padding: 20px; }
         .error-message { background-color: rgba(255, 0, 0, 0.2); padding: 15px; border-radius: 5px; }
+        .debug-info { background-color: rgba(0, 0, 255, 0.1); padding: 10px; margin-top: 10px; border-radius: 5px; font-family: monospace; white-space: pre-wrap; }
     </style>
 </head>
 <body>
-<header>
-    <nav>
-        <ul>
-            <li><a href="#">Accueil</a></li>
-            <li><a href="#">Prédictions</a></li>
-            <li><a href="#">Contact</a></li>
-        </ul>
-    </nav>
-</header>
-<div class="container-fluid p-0">
-    <img src="https://www.zabala.fr/wp-content/uploads/2023/11/intelligence-artificielle-et-conseil-1200x675.jpg" alt="AI Prediction" class="header-image" />
-</div>
-<section class="hero text-center p-4">
-    <div class="container">
-        <h1>Machine Learning API Prediction</h1>
-        <p>Anticipez mieux le risque d'inondation dans votre localité grâce à notre IA basée sur les données météos et hydrologiques en temps réel.</p>
-    </div>
-</section>
 <div class="container">
     <div class="card shadow p-4">
         <h2 class="text-center mb-4">Identifiez le risque à court terme</h2>
@@ -53,12 +26,13 @@
                 <label for="departement" class="form-label">Entrez votre numéro de département (2 chiffres) :</label>
                 <input type="text" id="departement" name="departement" class="form-control" 
                        required maxlength="2" pattern="[0-9]{1,2}" 
-                       placeholder="Ex: 01, 75, 13">
+                       placeholder="Ex: 01, 75, 13" value="12">
                 <small class="form-text text-muted">Entrez un numéro entre 01 et 95</small>
             </div>
             <button type="submit" class="btn btn-primary w-100">Obtenir les prévisions</button>
         </form>
         <div id="result" class="mt-4" style="display: none;"></div>
+        <div id="debug" class="debug-info mt-3" style="display: none;"></div>
     </div>
 </div>
 
@@ -66,39 +40,27 @@
 document.addEventListener("DOMContentLoaded", function() {
     const form = document.getElementById("predictionForm");
     const resultDiv = document.getElementById("result");
+    const debugDiv = document.getElementById("debug");
     
-    // Dictionnaire des départements pour afficher le nom
-    const departements = {
-        1: "Ain", 2: "Aisne", 3: "Allier", 4: "Alpes-de-Haute-Provence", 5: "Hautes-Alpes",
-        6: "Alpes-Maritimes", 7: "Ardèche", 8: "Ardennes", 9: "Ariège", 10: "Aube",
-        11: "Aude", 12: "Aveyron", 13: "Bouches-du-Rhône", 14: "Calvados", 15: "Cantal",
-        16: "Charente", 17: "Charente-Maritime", 18: "Cher", 19: "Corrèze", 20: "Corse-du-Sud",
-        21: "Côte-d'Or", 22: "Côtes-d'Armor", 23: "Creuse", 24: "Dordogne", 25: "Doubs",
-        26: "Drôme", 27: "Eure", 28: "Eure-et-Loir", 29: "Finistère", 30: "Gard",
-        31: "Haute-Garonne", 32: "Gers", 33: "Gironde", 34: "Hérault", 35: "Ille-et-Vilaine",
-        36: "Indre", 37: "Indre-et-Loire", 38: "Isère", 39: "Jura", 40: "Landes",
-        41: "Loir-et-Cher", 42: "Loire", 43: "Haute-Loire", 44: "Loire-Atlantique", 45: "Loiret",
-        46: "Lot", 47: "Lot-et-Garonne", 48: "Lozère", 49: "Maine-et-Loire", 50: "Manche",
-        51: "Marne", 52: "Haute-Marne", 53: "Mayenne", 54: "Meurthe-et-Moselle", 55: "Meuse",
-        56: "Morbihan", 57: "Moselle", 58: "Nièvre", 59: "Nord", 60: "Oise",
-        61: "Orne", 62: "Pas-de-Calais", 63: "Puy-de-Dôme", 64: "Pyrénées-Atlantiques", 65: "Hautes-Pyrénées",
-        66: "Pyrénées-Orientales", 67: "Bas-Rhin", 68: "Haut-Rhin", 69: "Rhône", 70: "Haute-Saône",
-        71: "Saône-et-Loire", 72: "Sarthe", 73: "Savoie", 74: "Haute-Savoie", 75: "Paris",
-        76: "Seine-Maritime", 77: "Seine-et-Marne", 78: "Yvelines", 79: "Deux-Sèvres", 80: "Somme",
-        81: "Tarn", 82: "Tarn-et-Garonne", 83: "Var", 84: "Vaucluse", 85: "Vendée",
-        86: "Vienne", 87: "Haute-Vienne", 88: "Vosges", 89: "Yonne", 90: "Territoire de Belfort",
-        91: "Essonne", 92: "Hauts-de-Seine", 93: "Seine-Saint-Denis", 94: "Val-de-Marne", 95: "Val-d'Oise"
-    };
+    // Fonction pour afficher les informations de débogage
+    function showDebug(title, content) {
+        debugDiv.style.display = "block";
+        debugDiv.innerHTML += `<strong>${title}:</strong>\n${content}\n\n`;
+    }
     
     form.addEventListener("submit", function(event) {
         event.preventDefault();
         
-        const departementInput = document.getElementById("departement").value.trim();
+        // Réinitialiser les zones d'affichage
+        resultDiv.style.display = "block";
+        debugDiv.style.display = "none";
+        debugDiv.innerHTML = "";
         
-        // Convertir l'entrée en nombre et vérifier qu'elle est entre 1 et 95
+        const departementInput = document.getElementById("departement").value.trim();
         const deptNum = parseInt(departementInput, 10);
+        
+        // Validation
         if (isNaN(deptNum) || deptNum < 1 || deptNum > 95) {
-            resultDiv.style.display = "block";
             resultDiv.innerHTML = `
                 <div class="error-message">
                     <h4>Erreur de saisie</h4>
@@ -108,68 +70,92 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
         
-        // Formater avec un zéro devant si nécessaire (01, 02, etc.)
+        // Formater avec un zéro devant si nécessaire
         const deptStr = deptNum.toString().padStart(2, '0');
         
-        // Afficher le div de résultat et montrer le chargement
-        resultDiv.style.display = "block";
         resultDiv.innerHTML = '<div class="loading"><div class="spinner-border text-light" role="status"></div><p class="mt-2">Chargement des prédictions...</p></div>';
         
-        // Créer l'objet de données
-        const requestData = {
-            departement: deptStr
-        };
+        // Trois formats différents pour tester lequel fonctionne
+        const requestData1 = { departement: deptStr };
+        const requestData2 = deptStr;
+        const requestData3 = { "departement": deptStr };
         
-        // Appel à l'API
+        // Essayer d'abord avec le premier format
+        showDebug("Format 1 - Envoi", JSON.stringify(requestData1, null, 2));
+        
         fetch("/predict", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(requestData),
+            body: JSON.stringify(requestData1),
         })
         .then(response => {
-            if (!response.ok) {
-                throw new Error(`Erreur serveur: ${response.status}`);
-            }
-            return response.json();
+            showDebug("Statut de la réponse", response.status + " " + response.statusText);
+            
+            // Récupérer le texte brut de la réponse pour le déboguer
+            return response.text().then(text => {
+                showDebug("Réponse brute", text || "(vide)");
+                
+                // Si la réponse est vide ou non valide, essayer avec le format 2
+                if (!text || text.trim() === "") {
+                    showDebug("Format 2 - Tentative", "La réponse était vide, essai avec format 2");
+                    
+                    return fetch("/predict", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(requestData2),
+                    }).then(resp => resp.text());
+                }
+                
+                // Sinon, retourner le texte récupéré
+                return text;
+            });
         })
-        .then(data => {
-            // Trouver le niveau de risque à partir du message
-            let riskClass = "risk-low";
-            if (data.annonce && data.annonce.includes("Risque élevé")) {
-                riskClass = "risk-high";
-            } else if (data.annonce && data.annonce.includes("Risque moyen")) {
-                riskClass = "risk-medium";
-            }
-            
-            // Formatter la date
-            const dateOptions = { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            };
-            const formattedDate = new Date().toLocaleDateString('fr-FR', dateOptions);
-            
-            // Afficher le message de prédiction
-            if (data.annonce) {
+        .then(responseText => {
+            try {
+                // Essayer de parser le JSON
+                const data = JSON.parse(responseText);
+                showDebug("Données JSON parsées", JSON.stringify(data, null, 2));
+                
+                // Afficher le résultat
                 resultDiv.innerHTML = `
-                    <h3 class="mb-3">Prévision pour le département ${deptNum} - ${departements[deptNum]}</h3>
-                    <p class="${riskClass}">${data.annonce}</p>
-                    <p class="text-muted mt-3">Dernière mise à jour: ${formattedDate}</p>
-                `;
-            } else {
-                // Au cas où l'API retourne une structure différente
-                resultDiv.innerHTML = `
-                    <h3 class="mb-3">Prévision pour le département ${deptNum} - ${departements[deptNum]}</h3>
-                    <p>Les données de prédiction ne sont pas disponibles dans le format attendu.</p>
+                    <h3 class="mb-3">Prévision pour le département ${deptNum}</h3>
+                    <p>${data.annonce || "Aucune annonce disponible"}</p>
                     <pre>${JSON.stringify(data, null, 2)}</pre>
                 `;
+            } catch (jsonError) {
+                showDebug("Erreur JSON", jsonError.message);
+                
+                // Si le parsing JSON échoue, essayer avec le format 3
+                showDebug("Format 3 - Tentative", "Échec du parsing JSON, essai avec format 3");
+                
+                return fetch("/predict", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(requestData3),
+                })
+                .then(resp => resp.text())
+                .then(text => {
+                    showDebug("Réponse format 3", text || "(vide)");
+                    
+                    resultDiv.innerHTML = `
+                        <div class="error-message">
+                            <h4>Erreur lors de la récupération des données</h4>
+                            <p>Les données reçues ne sont pas au format JSON valide.</p>
+                            <p>Veuillez contacter le support technique.</p>
+                        </div>
+                    `;
+                });
             }
         })
         .catch(error => {
+            showDebug("Erreur de requête", error.message);
+            
             resultDiv.innerHTML = `
                 <div class="error-message">
                     <h4>Erreur lors de la récupération des données</h4>
