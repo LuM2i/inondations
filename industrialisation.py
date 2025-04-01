@@ -27,7 +27,7 @@ app = FastAPI()
 # Configuration de CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[ "http://localhost:8080"], #"https://web-prediction-inondation-37.onrender.com",
+    allow_origins=[ "https://prediction-inondations.onrender.com"], #"https://web-prediction-inondation-37.onrender.com","http://localhost:8080",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
